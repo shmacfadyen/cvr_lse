@@ -87,6 +87,9 @@ add_executable(cvr_lse main/entrance_process.cpp ${GROUND_SOURCE_FILE} ${GRID_SO
 		${VR_LSE_SOURCE_FILE})
 add_executable(ground_segmentation main/entrance_ground.cpp ${GROUND_SOURCE_FILE})
 
+add_dependencies(cvr_lse ${${PROJECT_NAME}_EXPORTED_TARGETS})
+add_dependencies(ground_segmentation ${${PROJECT_NAME}_EXPORTED_TARGETS})
+
 target_link_libraries(cvr_lse ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES})
 target_link_libraries(ground_segmentation ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 

@@ -32,7 +32,9 @@ struct CvrLseParameters {
 		horizontal_resolution(0.2),
 		max_odd_threshold(20.0),
 		min_odd_threshold(-10.0),
-		max_distance(100.0) {
+		max_distance(100.0),
+		extRot(4, 0.0),
+		extTran(3, 0.0) {
 		extRot[0] = 1.0;
 	}
 
@@ -51,8 +53,8 @@ struct CvrLseParameters {
 	double max_odd_threshold;
 	double min_odd_threshold;
 	double max_distance;
-	std::vector<double> extRot(4, 0.0);
-	std::vector<double> extTran(3, 0.0);
+	std::vector<double> extRot;
+	std::vector<double> extTran;
 };
 
 enum GridStatus {
