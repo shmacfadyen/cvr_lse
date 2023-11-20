@@ -2,7 +2,29 @@
 
 <launch>
   <param name="/use_sim_time" value="true"/>
+
+  <arg name="lidar_topic" default="/points_raw"/>
+  <arg name="imu_topic" default="/imu_correct"/>
+  <arg name="lidar_frame" default="velodyne"/>
+  <arg name="time_field" default="time"/>
+
   <rosparam file="$(find lidar_odo)/config/params.yaml" command="load" />
+  <rosparam command="load" subst_value="True">
+lidar_odo:
+  # Topics
+  pointCloudTopic: "$(arg lidar_topic)"
+  imuTopic: "$(arg imu_topic)"
+
+  # Frames
+  lidarFrame: "$(arg lidar_frame)"
+
+  # Sensor Settings
+  timeField: "$(arg time_field)"
+
+  # CPU Params
+  numberOfCores: 4
+  </rosparam>
+  
   <node pkg="lidar_odo" type="lidar_odo_imuPreintegration"   name="lidar_odo_imuPreintegration"    output="screen" 	respawn="true"/>
   <node pkg="lidar_odo" type="lidar_odo_imageProjection"     name="lidar_odo_imageProjection"      output="screen"     respawn="true"/>
   <node pkg="lidar_odo" type="lidar_odo_mapOptmization"      name="lidar_odo_mapOptmization"       output="screen"     respawn="true"/>
@@ -10,16 +32,17 @@
   <arg name="project" default="cvr_lse"/>
   <node name="cvr_lse" pkg="cvr_lse" type="cvr_lse" output="screen">
     <rosparam command="load" file="$(find cvr_lse)/config/cvr_lse_params.yaml"/>
-    <param name = "lidar_topic" value = "/hesai40p_points_xyzirt" />
+    <param name = "lidar_topic" value = "$(arg lidar_topic)" />
     <param name = "cloud_label_topic" value = "/ground_segmentation/cloud_label"/>
     <param name = "lidar_odom_topic" value = "/odometry/imu" />
     <param name = "ground_output_topic" value = "/cvr_lse/ground_cloud" />
     <param name = "obstacle_output_topic" value = "/cvr_lse/obstacle_cloud" />
+    <param name = "lidar_frame" value = "$(arg lidar_frame)"/>
   </node>
 
   <node name="ground_segmentation" pkg="cvr_lse" type="ground_segmentation" output="screen">
     <rosparam command="load" file="$(find cvr_lse)/config/segmentation_params.yaml"/>
-    <param name = "lidar_topic" value = "/hesai40p_points_xyzirt" />
+    <param name = "lidar_topic" value = "$(arg lidar_topic)" />
     <param name = "cloud_label_topic" value = "/ground_segmentation/cloud_label" />
   </node>
   <node pkg="rviz" type="rviz" name="$(arg project)_rviz" args="-d $(find cvr_lse)/config/rviz.rviz" />

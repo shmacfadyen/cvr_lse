@@ -71,6 +71,8 @@ private:
 
 	CvrLseParameters cvr_lse_params_;
 
+	std::string lidar_frame_;
+
 	ros::NodeHandle nh_;
 
 	std::mutex cloud_lock_;

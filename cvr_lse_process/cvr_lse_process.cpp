@@ -16,7 +16,7 @@ void CvrLseProcess::InitCvrLse() {
 	update_flag_.resize(map_->getSize()(0U), map_->getSize()(1U));
 }
 
-void CvrLseProcess::Process(const CloudInfo& cloud_info, const PoseInfo& pose_info) {
+void CvrLseProcess::Process(const CloudInfo& cloud_info, const PoseInfo& pose_info, const std::string& frame_id) {
 	// the received pose is lidar pose
 	ScanAll scan_obstacle_info;
 	ScanAll scan_ground_info;
@@ -26,7 +26,7 @@ void CvrLseProcess::Process(const CloudInfo& cloud_info, const PoseInfo& pose_in
 	//
 	pcl::PointCloud<PointXYZIRT> obstacle_cloud;
 	obstacle_cloud.header = cloud_info.first.header;
-	obstacle_cloud.header.frame_id = "lidar_link";
+	obstacle_cloud.header.frame_id = frame_id;
 	for (const auto& obstacle : scan_obstacle_info) {
 		if (!obstacle.empty()) {
 			PointXYZIRT point{};

@@ -52,7 +52,7 @@ public:
 
 	~CvrLseProcess() = default;
 
-	void Process(const CloudInfo &cloud_info, const PoseInfo &pose_info);
+	void Process(const CloudInfo &cloud_info, const PoseInfo &pose_info, const std::string& frame_id);
 
 private:
 	void InitCvrLse();

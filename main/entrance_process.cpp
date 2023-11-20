@@ -66,6 +66,7 @@ bool EntranceProcess::LoadParameterForCvrLse()
 	                               cvr_lse_params_.extTran);
 	nh_.param<std::vector<double>>("cvr_lse/extrinsic_rot", cvr_lse_params_.extRot,
 	                               cvr_lse_params_.extRot);
+	nh_.param<std::string>("lidar_frame", lidar_frame_, "lidar_link");
 	return true;
 }
 
@@ -130,7 +131,7 @@ void EntranceProcess::MainProcess() {
 			if (cloud_info.first.size() != cloud_info.second.height.size()) {
 				continue;
 			}
-			cvr_lse_processer_->Process(cloud_info, cur_pose);
+			cvr_lse_processer_->Process(cloud_info, cur_pose, lidar_frame_);
 			VisualizationGroundPoint(cloud_info.first, cloud_info.second);
 		}
 	}
