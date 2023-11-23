@@ -175,9 +175,9 @@ int main(int argc, char** argv) {
 	nh.param<std::string>("/cvr_lse/lidar_topic", lidar_topic, "/hesai40p_points_xyzirt");
 	nh.param<std::string>("/cvr_lse/cloud_label_topic", cloud_label_topic, "/ground_segmentation/cloud_label");
 	nh.param<std::string>("/cvr_lse/lidar_odom_topic", lidar_odom_topic, "/odometry/imu");
-	point_cloud_sub_ = nh.subscribe(lidar_topic, 1, &cvr_lse::EntranceProcess::PointCloudCallback, &enter_node);
-	point_label_sub_ = nh.subscribe(cloud_label_topic, 1, &cvr_lse::EntranceProcess::PointLabelCallback, &enter_node);
-	lidar_odometry_sub_ = nh.subscribe(lidar_odom_topic, 1, &cvr_lse::EntranceProcess::LidarOdometryCallback,
+	point_cloud_sub_ = nh.subscribe(lidar_topic, 2, &cvr_lse::EntranceProcess::PointCloudCallback, &enter_node);
+	point_label_sub_ = nh.subscribe(cloud_label_topic, 2, &cvr_lse::EntranceProcess::PointLabelCallback, &enter_node);
+	lidar_odometry_sub_ = nh.subscribe(lidar_odom_topic, 2, &cvr_lse::EntranceProcess::LidarOdometryCallback,
 		&enter_node);
 	ros::spin();
 	enter_node.Stop();

@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
 	static_cast<void>(enter_node.Start());
 	std::string lidar_topic;
 	nh.param<std::string>("/ground_segmentation/lidar_topic", lidar_topic, "/hesai40p_points_xyzirt");
-	point_cloud_sub_ = nh.subscribe(lidar_topic, 1, &cvr_lse::EntranceGround::PointCloudCallback,
+	point_cloud_sub_ = nh.subscribe(lidar_topic, 2, &cvr_lse::EntranceGround::PointCloudCallback,
 		&enter_node);
 	ros::spin();
 }

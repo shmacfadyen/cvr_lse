@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <launch>
-  <param name="/use_sim_time" value="true"/>
-
+  <!-- Launch File Arguments -->
+  <arg name="project" default="cvr_lse"/>
   <arg name="lidar_topic" default="/points_raw"/>
-  <arg name="imu_topic" default="/imu_correct"/>
-  <arg name="lidar_frame" default="velodyne"/>
+  <arg name="imu_topic" default="/imu_raw"/>
+  <arg name="lidar_frame" default="/velodyne"/>
   <arg name="time_field" default="time"/>
+
+  <!-- Configuration Parameters -->
+  <param name="/use_sim_time" value="true"/>
 
   <rosparam file="$(find lidar_odo)/config/params.yaml" command="load" />
   <rosparam command="load" subst_value="True">
@@ -19,18 +22,34 @@ lidar_odo:
   lidarFrame: "$(arg lidar_frame)"
 
   # Sensor Settings
+  N_SCAN: 40
   timeField: "$(arg time_field)"
+  downsampleRate: 1
+
+  # IMU Settings
+  extrinsicTrans: [-8.086759e-01, 3.195559e-01, -7.997231e-01]
+  extrinsicRot: [  9.999976e-01, 7.553071e-04, -2.035826e-03,
+                  -7.854027e-04, 9.998898e-01, -1.482298e-02,
+                   2.024406e-03, 1.482454e-02,  9.998881e-01]
 
   # CPU Params
-  numberOfCores: 4
+  numberOfCores: 3
   </rosparam>
   
+  <!-- LIO-SAM SLAM Processes -->
   <node pkg="lidar_odo" type="lidar_odo_imuPreintegration"   name="lidar_odo_imuPreintegration"    output="screen" 	respawn="true"/>
   <node pkg="lidar_odo" type="lidar_odo_imageProjection"     name="lidar_odo_imageProjection"      output="screen"     respawn="true"/>
   <node pkg="lidar_odo" type="lidar_odo_mapOptmization"      name="lidar_odo_mapOptmization"       output="screen"     respawn="true"/>
 
-  <arg name="project" default="cvr_lse"/>
-  <node name="cvr_lse" pkg="cvr_lse" type="cvr_lse" output="screen">
+  <!-- Segmentation/Obstacle Detection -->
+  <node name="ground_segmentation" pkg="cvr_lse" type="ground_segmentation" output="screen">
+    <rosparam command="load" file="$(find cvr_lse)/config/segmentation_params.yaml"/>
+    <param name = "lidar_topic" value = "$(arg lidar_topic)" />
+    <param name = "cloud_label_topic" value = "/ground_segmentation/cloud_label" />
+  </node>
+  
+  <!-- Process for Compact Vectorized Representation of Local Static Environments -->
+  <node name="$(arg project)" pkg="cvr_lse" type="cvr_lse" output="screen">
     <rosparam command="load" file="$(find cvr_lse)/config/cvr_lse_params.yaml"/>
     <param name = "lidar_topic" value = "$(arg lidar_topic)" />
     <param name = "cloud_label_topic" value = "/ground_segmentation/cloud_label"/>
@@ -40,10 +59,6 @@ lidar_odo:
     <param name = "lidar_frame" value = "$(arg lidar_frame)"/>
   </node>
 
-  <node name="ground_segmentation" pkg="cvr_lse" type="ground_segmentation" output="screen">
-    <rosparam command="load" file="$(find cvr_lse)/config/segmentation_params.yaml"/>
-    <param name = "lidar_topic" value = "$(arg lidar_topic)" />
-    <param name = "cloud_label_topic" value = "/ground_segmentation/cloud_label" />
-  </node>
+  <!-- Visualization of Results -->
   <node pkg="rviz" type="rviz" name="$(arg project)_rviz" args="-d $(find cvr_lse)/config/rviz.rviz" />
 </launch>

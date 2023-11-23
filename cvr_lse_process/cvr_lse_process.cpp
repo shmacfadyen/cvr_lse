@@ -173,10 +173,10 @@ void CvrLseProcess::PreProcessPointCloud(const CloudInfo& cloud_info, ScanAll& s
 		const auto& point = clou_info[i];
 		auto point_index = ObtainIndexOfPoint(point);
 		if (label_info.label[i] == 0U) {
-			scan_obstacle_info[point_index].emplace_back(point.x, point.y, point.z, 0U, point.timestamp,
+			scan_obstacle_info[point_index].emplace_back(point.x, point.y, point.z, 0U, point.time,
 				label_info.isHeightValid[i], label_info.height[i], point.ring);
 		} else {
-			scan_ground_info[point_index].emplace_back(point.x, point.y, point.z, 1U, point.timestamp,
+			scan_ground_info[point_index].emplace_back(point.x, point.y, point.z, 1U, point.time,
 				label_info.isHeightValid[i], label_info.height[i], point.ring);
 		}
 	}
