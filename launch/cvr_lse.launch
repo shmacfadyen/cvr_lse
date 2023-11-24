@@ -56,15 +56,11 @@ lio_sam:
                    0.0,  0.0,  1.0]
   </rosparam>
   
-  <!-- LIO-SAM SLAM Processes -->
-  <!--- LOAM -->
-  <include file="$(find lio_sam)/launch/include/module_loam.launch" />
-
   <!--- Robot State TF -->
   <include file="$(find lio_sam)/launch/include/module_robot_state_publisher.launch" />
-
-  <!--- Run Navsat -->
-  <include file="$(find lio_sam)/launch/include/module_navsat.launch" />
+  
+  <!-- LIO-SAM SLAM Processes - LOAM -->
+  <include file="$(find lio_sam)/launch/include/module_loam.launch" />
 
   <!-- Segmentation/Obstacle Detection -->
   <node name="ground_segmentation" pkg="cvr_lse" type="ground_segmentation" output="screen">
