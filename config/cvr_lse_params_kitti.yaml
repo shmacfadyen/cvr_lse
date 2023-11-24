@@ -14,7 +14,7 @@ cvr_lse:
   max_odd_threshold: 20.0
   min_odd_threshold: -10.0
   horizontal_resolution: 0.2 # degree
-  max_distance: 100.0 # max distance for the lidar sensor
+  max_distance: 1000.0 # max distance for the lidar sensor
   # calibration information from vehicle to lidar
   extrinsic_trans: [-8.086759e-01, 3.195559e-01, -7.997231e-01]
   extrinsic_rot: [0.9999719, 0.007412088, -0.001015086, -0.0003851883]
