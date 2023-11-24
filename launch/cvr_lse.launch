@@ -7,15 +7,19 @@
   <arg name="imu_topic" default="/imu_raw"/>
   <arg name="lidar_frame" default="/velodyne"/>
   <arg name="lidar_sensor" default="velodyne"/>
+  <arg name="min_range_lidar" default="1.0"/>
+  <arg name="max_range_lidar" default="1000.0"/>
+  <arg name="map_opt_cores" default="4"/>
 
-  <!-- Dataset Arguments -->
-  <arg name="use_kitti_settings" default="false"/>
-  <arg name="use_fieldsafe_settings" default="false"/>
+  <!-- Configuration Override Arguments -->
+  <arg name="enable_config_override" default="false"/>
+  <arg name="config_override_dir" default="$(find cvr_lse)/config"/>
 
   <!-- Configuration Parameters -->
   <param name="/use_sim_time" value="true"/>
 
   <rosparam file="$(find lio_sam)/config/params.yaml" command="load" />
+  <rosparam file="$(arg config_override_dir)/lio_sam_params.yaml" command="load" if="$(arg enable_config_override)"/>
   <rosparam command="load" subst_value="True">
 lio_sam:
   # Topics
@@ -27,33 +31,11 @@ lio_sam:
 
   # Sensor Settings
   sensor: "$(arg lidar_sensor)"
+  lidarMinRange: $(min_range_lidar)
+  lidarMaxRange: $(max_range_lidar)
 
   # CPU Params
-  numberOfCores: 3
-  </rosparam>
-  <rosparam command="load" if="$(eval use_kitti_settings and not use_fieldsafe_settings)">
-lio_sam:
-  # Sensor Settings
-  N_SCAN: 64
-  downsampleRate: 4
-  
-  # IMU Settings
-  extrinsicTrans: [-8.086759e-01, 3.195559e-01, -7.997231e-01]
-  extrinsicRot: [  9.999976e-01, 7.553071e-04, -2.035826e-03,
-                  -7.854027e-04, 9.998898e-01, -1.482298e-02,
-                   2.024406e-03, 1.482454e-02,  9.998881e-01]
-  </rosparam>
-  <rosparam command="load" if="$(eval not use_kitti_settings and use_fieldsafe_settings)">
-lio_sam:
-  # Sensor Settings
-  N_SCAN: 32
-  downsampleRate: 2
-  
-  # IMU Settings
-  extrinsicTrans: [-0.180, 0.295, -2.384]
-  extrinsicRot: [ -1.0,  0.0,  0.0,
-                   0.0, -1.0,  0.0,
-                   0.0,  0.0,  1.0]
+  numberOfCores: $(arg map_opt_cores)
   </rosparam>
   
   <!--- Robot State TF -->
@@ -65,6 +47,7 @@ lio_sam:
   <!-- Segmentation/Obstacle Detection -->
   <node name="ground_segmentation" pkg="cvr_lse" type="ground_segmentation" output="screen">
     <rosparam command="load" file="$(find cvr_lse)/config/segmentation_params.yaml"/>
+    <rosparam command="load" file="$(arg config_override_dir)/segmentation_params.yaml" if="$(arg enable_config_override)"/>
     <param name = "lidar_topic" value = "$(arg lidar_topic)" />
     <param name = "cloud_label_topic" value = "/ground_segmentation/cloud_label" />
   </node>
@@ -72,8 +55,8 @@ lio_sam:
   <!-- Process for Compact Vectorized Representation of Local Static Environments -->
   <node name="$(arg project)" pkg="cvr_lse" type="cvr_lse" output="screen">
     <rosparam command="load" file="$(find cvr_lse)/config/cvr_lse_params.yaml"/>
-    <rosparam command="load" file="$(find cvr_lse)/config/cvr_lse_params_kitti.yaml" if="$(eval use_kitti_settings and not use_fieldsafe_settings)"/>
-    <rosparam command="load" file="$(find cvr_lse)/config/cvr_lse_params_fieldsafe.yaml" if="$(eval not use_kitti_settings and use_fieldsafe_settings)"/>
+    <rosparam command="load" file="$(arg config_override_dir)/cvr_lse_params.yaml" if="$(arg enable_config_override)"/>
+    <param name="cvr_lse/max_distance" value="$(max_range_lidar)"/>
 
     <param name = "lidar_topic" value = "$(arg lidar_topic)" />
     <param name = "cloud_label_topic" value = "/ground_segmentation/cloud_label"/>
