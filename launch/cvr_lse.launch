@@ -31,8 +31,8 @@ lio_sam:
 
   # Sensor Settings
   sensor: "$(arg lidar_sensor)"
-  lidarMinRange: $(min_range_lidar)
-  lidarMaxRange: $(max_range_lidar)
+  lidarMinRange: $(arg min_range_lidar)
+  lidarMaxRange: $(arg max_range_lidar)
 
   # CPU Params
   numberOfCores: $(arg map_opt_cores)
@@ -56,7 +56,7 @@ lio_sam:
   <node name="$(arg project)" pkg="cvr_lse" type="cvr_lse" output="screen">
     <rosparam command="load" file="$(find cvr_lse)/config/cvr_lse_params.yaml"/>
     <rosparam command="load" file="$(arg config_override_dir)/cvr_lse_params.yaml" if="$(arg enable_config_override)"/>
-    <param name="cvr_lse/max_distance" value="$(max_range_lidar)"/>
+    <param name="cvr_lse/max_distance" value="$(arg max_range_lidar)"/>
 
     <param name = "lidar_topic" value = "$(arg lidar_topic)" />
     <param name = "cloud_label_topic" value = "/ground_segmentation/cloud_label"/>
