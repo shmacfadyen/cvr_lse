@@ -11,6 +11,9 @@
   <arg name="max_range_lidar" default="1000.0"/>
   <arg name="map_opt_cores" default="4"/>
 
+  <!-- Robot State TF File Argument -->
+  <arg name="static_tf_launch_file" default="$(find lio_sam)/launch/include/module_robot_state_publisher.launch"/>
+
   <!-- Configuration Override Arguments -->
   <arg name="enable_config_override" default="false"/>
   <arg name="config_override_dir" default="$(find cvr_lse)/config"/>
@@ -38,8 +41,8 @@ lio_sam:
   numberOfCores: $(arg map_opt_cores)
   </rosparam>
   
-  <!--- Robot State TF -->
-  <include file="$(find lio_sam)/launch/include/module_robot_state_publisher.launch" />
+  <!-- Robot State TF -->
+  <include file="$(arg static_tf_launch_file)" />
   
   <!-- LIO-SAM SLAM Processes - LOAM -->
   <include file="$(find lio_sam)/launch/include/module_loam.launch" />
