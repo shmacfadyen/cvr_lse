@@ -57,7 +57,7 @@ void CvrLseProcess::Process(const CloudInfo& cloud_info, const PoseInfo& pose_in
 	map_->move(map_position_);
 	update_flag_.setConstant(0U);
 	UpdateGridMap(scan_obstacle_info);
-	PublishGridMap(*map_);
+	PublishGridMap(*map_, cloud_info.second.header.stamp);
 
 	// process the submap from the complete map information
 	bool isSuccess = false;
@@ -66,7 +66,7 @@ void CvrLseProcess::Process(const CloudInfo& cloud_info, const PoseInfo& pose_in
 	std::vector<std::vector<cv::Point2f>> find_contour;
 	post_process_->ProcessGridMap(submap, find_contour);
 	// TransformFromOdomToVeh(cur_veh_pos_, find_contour);
-	PublishContours(find_contour);
+	PublishContours(find_contour, cloud_info.second.header.stamp);
 }
 
 void CvrLseProcess::InitialTransformationInfo() {
@@ -316,10 +316,10 @@ void CvrLseProcess::UpdateStitchPolygon(const ScanPoint& pointLast, const ScanPo
 	}
 }
 
-void CvrLseProcess::PublishGridMap(const grid_map::GridMap &submap) {
+void CvrLseProcess::PublishGridMap(const grid_map::GridMap &submap, ros::Time t) {
 	nav_msgs::OccupancyGrid occupancy_grid;
 	occupancy_grid.header.frame_id = "map";
-	occupancy_grid.header.stamp = ros::Time::now();
+	occupancy_grid.header.stamp = t;
 
 	const double half_length_x = map_->getLength().x() * 0.5;
 	const double half_length_y = map_->getLength().y() * 0.5;
@@ -354,7 +354,7 @@ void CvrLseProcess::PublishGridMap(const grid_map::GridMap &submap) {
 }
 
 // for visualization
-void CvrLseProcess::PublishContours(const std::vector<std::vector<cv::Point2f>>& contours) {
+void CvrLseProcess::PublishContours(const std::vector<std::vector<cv::Point2f>>& contours, ros::Time t) {
 	visualization_msgs::MarkerArray line_markers;
 	int32_t currentId = 0U;
 	double bottom_z = cur_veh_pos_.z;
@@ -435,7 +435,7 @@ void CvrLseProcess::PublishContours(const std::vector<std::vector<cv::Point2f>>&
 		line_marker.points.emplace_back(p_end);
 
 		line_marker.header.frame_id = "odom";
-		line_marker.header.stamp = ros::Time::now();
+		line_marker.header.stamp = t;
 		line_markers.markers.emplace_back(line_marker);
 	}
 	convex_Marker_Pub_.publish(line_markers);
