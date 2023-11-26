@@ -57,7 +57,7 @@ void CvrLseProcess::Process(const CloudInfo& cloud_info, const PoseInfo& pose_in
 	map_->move(map_position_);
 	update_flag_.setConstant(0U);
 	UpdateGridMap(scan_obstacle_info);
-	PublishGridMap(*map_);
+	PublishGridMap(*map_, cloud_info.second.header.stamp);
 
 	// process the submap from the complete map information
 	bool isSuccess = false;
@@ -65,8 +65,8 @@ void CvrLseProcess::Process(const CloudInfo& cloud_info, const PoseInfo& pose_in
 	                              isSuccess);
 	std::vector<std::vector<cv::Point2f>> find_contour;
 	post_process_->ProcessGridMap(submap, find_contour);
-	TransformFromOdomToVeh(cur_veh_pos_, find_contour);
-	PublishContours(find_contour);
+	//TransformFromOdomToVeh(cur_veh_pos_, find_contour);
+	PublishContours(find_contour, cloud_info.second.header.stamp);
 }
 
 void CvrLseProcess::InitialTransformationInfo() {
@@ -316,10 +316,10 @@ void CvrLseProcess::UpdateStitchPolygon(const ScanPoint& pointLast, const ScanPo
 	}
 }
 
-void CvrLseProcess::PublishGridMap(const grid_map::GridMap &submap) {
+void CvrLseProcess::PublishGridMap(const grid_map::GridMap &submap, ros::Time t) {
 	nav_msgs::OccupancyGrid occupancy_grid;
 	occupancy_grid.header.frame_id = "map";
-	occupancy_grid.header.stamp = ros::Time::now();
+	occupancy_grid.header.stamp = t;
 
 	const double half_length_x = map_->getLength().x() * 0.5;
 	const double half_length_y = map_->getLength().y() * 0.5;
@@ -354,9 +354,11 @@ void CvrLseProcess::PublishGridMap(const grid_map::GridMap &submap) {
 }
 
 // for visualization
-void CvrLseProcess::PublishContours(const std::vector<std::vector<cv::Point2f>>& contours) {
+void CvrLseProcess::PublishContours(const std::vector<std::vector<cv::Point2f>>& contours, ros::Time t) {
 	visualization_msgs::MarkerArray line_markers;
 	int32_t currentId = 0U;
+	double bottom_z = cur_veh_pos_.z;
+	double top_z = bottom_z + 2.5;
 	for (const auto& contour : contours) {
 		visualization_msgs::Marker line_marker;
 		line_marker.ns = "convex";
@@ -368,68 +370,72 @@ void CvrLseProcess::PublishContours(const std::vector<std::vector<cv::Point2f>>&
 		line_marker.color.g = 0.0;
 		line_marker.color.b = 0.8;
 		line_marker.color.a = 1.0;
-		line_marker.lifetime = ros::Duration(0.1);
+		line_marker.lifetime = ros::Duration(0.4);
+		line_marker.pose.orientation.w = 1;
+		line_marker.pose.orientation.x = 0;
+		line_marker.pose.orientation.y = 0;
+		line_marker.pose.orientation.z = 0;
 		for (size_t i = 0U; i < contour.size() - 1U; ++i) {
 			geometry_msgs::Point p_start;
 			p_start.x = contour[i].x;
 			p_start.y = contour[i].y;
-			p_start.z = 0.3;
+			p_start.z = bottom_z;
 			line_marker.points.emplace_back(p_start);
 			geometry_msgs::Point p_end;
 			p_end.x = contour[i + 1U].x;
 			p_end.y = contour[i + 1U].y;
-			p_end.z = 0.3;
+			p_end.z = bottom_z;
 			line_marker.points.emplace_back(p_end);
 
 			p_start.x = contour[i].x;
 			p_start.y = contour[i].y;
-			p_start.z = 2.0;
+			p_start.z = top_z;
 			line_marker.points.emplace_back(p_start);
 			p_end.x = contour[i + 1U].x;
 			p_end.y = contour[i + 1U].y;
-			p_end.z = 2.0;
+			p_end.z = top_z;
 			line_marker.points.emplace_back(p_end);
 
 			p_start.x = contour[i].x;
 			p_start.y = contour[i].y;
-			p_start.z = 0.3;
+			p_start.z = bottom_z;
 			line_marker.points.emplace_back(p_start);
 			p_end.x = contour[i].x;
 			p_end.y = contour[i].y;
-			p_end.z = 2.0;
+			p_end.z = top_z;
 			line_marker.points.emplace_back(p_end);
 		}
 		geometry_msgs::Point p_start;
 		p_start.x = contour.back().x;
 		p_start.y = contour.back().y;
-		p_start.z = 0.3;
+		p_start.z = bottom_z;
 		line_marker.points.emplace_back(p_start);
 		geometry_msgs::Point p_end;
 		p_end.x = contour.front().x;
 		p_end.y = contour.front().y;
-		p_end.z = 0.3;
+		p_end.z = bottom_z;
 		line_marker.points.emplace_back(p_end);
 
 		p_start.x = contour.back().x;
 		p_start.y = contour.back().y;
-		p_start.z = 2.0;
+		p_start.z = top_z;
 		line_marker.points.emplace_back(p_start);
 		p_end.x = contour.front().x;
 		p_end.y = contour.front().y;
-		p_end.z = 2.0;
+		p_end.z = top_z;
 		line_marker.points.emplace_back(p_end);
 
 		p_start.x = contour.back().x;
 		p_start.y = contour.back().y;
-		p_start.z = 0.3;
+		p_start.z = bottom_z;
 		line_marker.points.emplace_back(p_start);
 		p_end.x = contour.back().x;
 		p_end.y = contour.back().y;
-		p_end.z = 2.0;
+		p_end.z = top_z;
 		line_marker.points.emplace_back(p_end);
 
-		line_marker.header.frame_id = "base_link";
-		line_marker.header.stamp = ros::Time::now();
+		line_marker.header.frame_id = "odom";
+		line_marker.header.stamp = t;
 		line_markers.markers.emplace_back(line_marker);
 	}
 	convex_Marker_Pub_.publish(line_markers);

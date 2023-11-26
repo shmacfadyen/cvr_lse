@@ -84,9 +84,9 @@ private:
 
 	void UpdateGridMap(ScanAll& scan_obstacle_Info);
 
-	void PublishGridMap(const grid_map::GridMap& submap);
+	void PublishGridMap(const grid_map::GridMap& submap, ros::Time t);
 
-	void PublishContours(const std::vector<std::vector<cv::Point2f>>& contours);
+	void PublishContours(const std::vector<std::vector<cv::Point2f>>& contours, ros::Time t);
 
 	void TranformScanPointToOdom(ScanPoint& point);
 
