@@ -167,10 +167,10 @@ void GroundSegmentation::AssignClusterThread(const unsigned int& start_index, co
 			} else {
 				segmentation->isHeightValid[i] = true;
 				segmentation->height[i] = static_cast<float>(point_2d.z + params_.sensor_height);
-				if ((point_2d.d < 12.0) && (point_2d.z < (0.3 - params_.sensor_height))) {
+				if ((point_2d.d < 6.0) && (point_2d.z < (0.3 - params_.sensor_height))) {
 					segmentation->label[i] = 1U;
 				} 
-				else if ((point_2d.z + params_.sensor_height) < (0.025 * point_2d.d)) {
+				else if ((point_2d.z + params_.sensor_height) < (-0.05 * point_2d.d + 0.6)) {
 					segmentation->label[i] = 1U;
 				} 
 				else {
