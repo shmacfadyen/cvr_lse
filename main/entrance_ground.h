@@ -5,6 +5,8 @@
 #ifndef CVR_LSE_ENTRANCE_GROUND_H
 #define CVR_LSE_ENTRANCE_GROUND_H
 #include <ros/ros.h>
+#include <tf2_ros/transform_listener.h>
+#include <geometry_msgs/TransformStamped.h>
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <thread>
@@ -31,12 +33,16 @@ namespace cvr_lse {
 using namespace ground_segmentation;
 class EntranceGround {
 public:
-	explicit EntranceGround(const ros::NodeHandle &nh) : nh_(nh) {};
+	explicit EntranceGround(const ros::NodeHandle &nh) : nh_(nh), listener_(tf_buffer_), found_tf_(false) {};
 
 	~EntranceGround() = default;
 
 	void PointCloudCallback(const sensor_msgs::PointCloud2ConstPtr& cloud);
 
+	void Init();
+	
+	void OnTimer(const ros::TimerEvent&);
+	
 	bool Start();
 
 	EntranceGround(const EntranceGround &) = delete;
@@ -58,6 +64,13 @@ private:
 	ros::NodeHandle nh_;
 
 	ros::Publisher ground_label_;
+	ros::Subscriber point_cloud_sub_;
+
+	ros::Timer delay_timer_;
+
+	tf2_ros::TransformListener listener_;
+	tf2_ros::Buffer tf_buffer_;
+	bool found_tf_;
 };
 }
 

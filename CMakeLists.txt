@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   	roscpp
   	rospy
   	cv_bridge
+		tf2_ros
   	# pcl library
   	pcl_conversions
   	# msgs
